@@ -1,7 +1,6 @@
 const middy = require('middy');
 const { cors } = require('middy/middlewares');
 const { SQS } = require('aws-sdk');
-const crypto = require('crypto');
 
 const sqs = new SQS();
 
@@ -67,14 +66,11 @@ const publish = async (event) => {
     id,
     data: extract(data),
   };
-  const hash = crypto.createHash('sha256');
 
   try {
     await sqs.sendMessage({
       QueueUrl: queueUrl,
-      MessageGroupId: id,
       MessageBody: JSON.stringify(messageBody),
-      MessageDeduplicationId: hash.update(messageBody.data.rcp_item).digest('hex'),
     }).promise();
 
     message = 'Success';

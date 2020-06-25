@@ -3,6 +3,7 @@ service: monitoring
 provider:
   name: aws
   runtime: nodejs12.x
+  timeout: 10
   memorySize: ${self:custom.memorySize}
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${self:custom.region}
@@ -28,8 +29,8 @@ custom:
   defaultStage: dev
   profiles:
     dev: potechSlsDev
-    prod: potechSlsProd
-  # Resource specific
+    prod: potechSlsDev
+  googleSheetId: ${opt:sheetId}
   googleSecretKeyId: ${self:service}-${self:provider.stage}-key
 
 plugins:
@@ -42,7 +43,7 @@ package:
 
 functions:
   publish:
-    reservedConcurrency: 5
+    reservedConcurrency: 3
     handler: src/publisher/publish.handler
     environment:
       QUEUE_URL:
@@ -53,18 +54,18 @@ functions:
           method: post
           cors: true
 
-  consume:
-    reservedConcurrency: 5
-    handler: src/subscriber/subscribe.handler
+  consumer:
+    reservedConcurrency: 1
+    handler: src/consumer/consume.handler
     environment:
       GOOGLE_SA_EMAIL: ${file(.keys/gsheetKey.json):client_email}
       GOOGLE_PK_SECRET_ID: ${self:custom.googleSecretKeyId}
-      GOOGLE_SHEET_ID: 1uasdzK_gRVByAIZ0AD7LECYxNor0aDo_3l_bdxM3fnA
+      GOOGLE_SHEET_ID: ${self:custom.googleSheetId}
     events:
       - sqs:
-          batchSize: 1
+          batchSize: 5
           arn:
-            Fn::GetAtt: [ JobQueue, Arn]
+            Fn::GetAtt: [ JobQueue, Arn ]
 
 resources:
   - ${file(resources/googleKey.yml)}

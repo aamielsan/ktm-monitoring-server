@@ -2,10 +2,14 @@ const { SecretsManager } = require('aws-sdk');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
  
 const sm = new SecretsManager();
+const count = 1000;
 
+const googleSheetId = process.env.GOOGLE_SHEET_ID;
 const googleEmail = process.env.GOOGLE_SA_EMAIL;
 const googleSecretId = process.env.GOOGLE_PK_SECRET_ID;
 let googlePrivateKey;
+
+const doc = new GoogleSpreadsheet(googleSheetId);
 
 const CELL_FIELD = {
   0: 'rcp_item',
@@ -41,32 +45,33 @@ const getGoogleKey = async () => {
   }
 }
 
-const loadGoogleSheet = async (id) => {
+const loadGoogleSheet = async () => {
   try {
-    const doc = new GoogleSpreadsheet(id);
     await doc.useServiceAccountAuth({
       client_email: googleEmail,
       private_key: googlePrivateKey,
     });
     await doc.loadInfo();
-    return doc;
   } catch (e) {
     throw e;
   }
 }
 
-const findRowById = async (doc, id) => {
+const findRowById = async (id) => {
   try {
+    console.log('Looking for id ', id);
     const data = doc.sheetsByIndex[0];
-    const meta = doc.sheetsByIndex[1];
-
-    await meta.loadCells('A1');
-    const count = meta.getCell(0, 0).value;
-
     await data.loadCells(`A1:A${count + 1}`)
 
     for (let i = 0; i < count; i++) {
       const dataId = data.getCell(i, 0).value;
+      console.log('Checking row id ', dataId);
+
+      if (!dataId) {
+        console.log('Reached new row ', i);
+        return i;
+      }
+
       if (dataId === id) {
         return i;
       }
@@ -78,7 +83,7 @@ const findRowById = async (doc, id) => {
   }
 }
 
-const updateRecord = async (doc, record, row) => {
+const updateRecord = async (record, row) => {
   try {
     console.log('Updating row for ', row, record.rcp_item);
 
@@ -95,51 +100,38 @@ const updateRecord = async (doc, record, row) => {
   }
 }
 
-const createRecord = async (doc, record) => {
-  try {
-    console.log('Creating new row for ', record.rcp_item);
-
-    const meta = doc.sheetsByIndex[1];
-    await meta.loadCells('A1');
-    const countCell = meta.getCell(0, 0);
-
-    const newCount = countCell.value + 1;
-    await updateRecord(doc, record, newCount);
-
-    countCell.value = newCount;
-    await meta.saveUpdatedCells();
-  } catch (e) {
-    throw e;
-  }
-}
-
 module.exports.handler = async (event) => {
   try {
     if (!googlePrivateKey) {
       googlePrivateKey = await getGoogleKey();
     }
 
+    if (!doc._rawProperties) {
+      await loadGoogleSheet();
+    }
+
     for (const record of event.Records) {
       const { id, data } = JSON.parse(record.body);
+
+      if (googleSheetId !== id) {
+        console.log('Not a worker for the ID. Skipping...');
+        continue;
+      }
 
       if (!data || !data.rcp_item) {
         console.log('`rcp_item` field not found. Skipping...');
         continue;
       }
 
-      const doc = await loadGoogleSheet(id);
-      const row = await findRowById(doc, data.rcp_item);
-
-      if (row > -1) {
-        await updateRecord(doc, data, row);
-      } else {
-        await createRecord(doc, data);
-      }
-
-      doc.resetLocalCache();
+      console.log('Processing record ', record);
+      const row = await findRowById(data.rcp_item);
+      await updateRecord(data, row);
     }
+
+    doc.resetLocalCache();
 
   } catch (error) {
     console.log(error);
+    throw e;
   }
 };
