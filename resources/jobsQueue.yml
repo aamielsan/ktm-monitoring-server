@@ -2,8 +2,7 @@ Resources:
   JobQueue:
     Type: "AWS::SQS::Queue"
     Properties:
-      QueueName: ${self:service}-${self:provider.stage}.fifo
-      FifoQueue: true
+      QueueName: ${self:service}-${self:provider.stage}
       KmsMasterKeyId: alias/aws/sqs
       RedrivePolicy:
         maxReceiveCount: 5
@@ -12,6 +11,5 @@ Resources:
   DeadLetterQueue:
     Type: "AWS::SQS::Queue"
     Properties:
-      QueueName: ${self:service}-dlq-${self:provider.stage}.fifo
-      FifoQueue: true
+      QueueName: ${self:service}-${self:provider.stage}-dlq
       KmsMasterKeyId: alias/aws/sqs
