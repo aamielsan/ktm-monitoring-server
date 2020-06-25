@@ -1,0 +1,6 @@
+defaultStage: dev
+profiles:
+  dev: potechSlsDev
+  prod: potechSlsProd
+memorySize: 128
+region: us-east-1

@@ -1,0 +1,6 @@
+Resources:
+  GoogleKey:
+    Type: "AWS::SecretsManager::Secret"
+    Properties: 
+      Name: ${self:custom.googleSecretKeyId}
+      SecretString: ${file(.keys/gsheetKey.json):private_key}

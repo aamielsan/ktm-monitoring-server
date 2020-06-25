@@ -1,0 +1,22 @@
+{
+  "rcp_item": "RCP-001",
+  "rcp_payee": "John Dough & Electric Co",
+  "rcp_invoiceRef": "INV-001",
+  "rcp_amtPeso": "1,000",
+  "rcp_amtDollar": "",
+  "rcp_particulars": "Raw electric materials inventory",
+  "rcp_dateDue": "01-Jan",
+  "rcp_dateTransmitted": "02-Jan",
+  "apv_dateTransaction": "03-Jan",
+  "apv_no": "1234",
+  "apv_remarks": "for CDV",
+  "apv_dateTransmitted": "05-Jan",
+  "apv_receivedBy": "Jane Doe",
+  "cdv_dateTransaction": "08-Jan",
+  "cdv_no": "4321",
+  "cdv_checkNo": "11111",
+  "cdv_status": "Approved",
+  "cdv_checkStatus": "Released",
+  "cdv_datePayment": "10-Jan",
+  "updatedBy": "Juan"
+}

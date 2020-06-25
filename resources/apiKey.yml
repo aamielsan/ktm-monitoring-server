@@ -1,0 +1,10 @@
+Resources:
+  DevApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties: 
+      Enabled: true
+Outputs:
+  ApiKey:
+    Description: Development API key
+    Value:
+      Ref: DevApiKey

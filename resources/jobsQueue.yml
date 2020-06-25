@@ -1,0 +1,17 @@
+Resources:
+  JobQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: ${self:service}-${self:provider.stage}.fifo
+      FifoQueue: true
+      KmsMasterKeyId: alias/aws/sqs
+      RedrivePolicy:
+        maxReceiveCount: 5
+        deadLetterTargetArn:
+          Fn::GetAtt: [ DeadLetterQueue, Arn ]
+  DeadLetterQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: ${self:service}-dlq-${self:provider.stage}.fifo
+      FifoQueue: true
+      KmsMasterKeyId: alias/aws/sqs

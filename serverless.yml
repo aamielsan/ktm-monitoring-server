@@ -1,0 +1,72 @@
+service: monitoring
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: ${self:custom.memorySize}
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: ${self:custom.region}
+  profile: ${self:custom.profiles.${opt:stage, self:provider.stage, 'dev'}}
+
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - sqs:SendMessage
+      - sqs:DeleteMessage
+      - sqs:ReceiveMessage
+      - sqs:GetQueueAttributes
+    Resource:
+      - Fn::GetAtt: [ JobQueue, Arn ]
+  - Effect: Allow
+    Action:
+      - secretsmanager:GetSecretValue
+    Resource: '*'
+
+custom: 
+  region: us-east-1
+  memorySize: 128
+  defaultStage: dev
+  profiles:
+    dev: potechSlsDev
+    prod: potechSlsProd
+  # Resource specific
+  googleSecretKeyId: ${self:service}-${self:provider.stage}-key
+
+plugins:
+  - serverless-mocha-plugin
+
+package:
+  excludeDevDependencies: true
+  exclude:
+    - .keys/**
+
+functions:
+  publish:
+    reservedConcurrency: 5
+    handler: src/publisher/publish.handler
+    environment:
+      QUEUE_URL:
+        Ref: JobQueue
+    events:
+      - http:
+          path: publish
+          method: post
+          cors: true
+
+  consume:
+    reservedConcurrency: 5
+    handler: src/subscriber/subscribe.handler
+    environment:
+      GOOGLE_SA_EMAIL: ${file(.keys/gsheetKey.json):client_email}
+      GOOGLE_PK_SECRET_ID: ${self:custom.googleSecretKeyId}
+      GOOGLE_SHEET_ID: 1uasdzK_gRVByAIZ0AD7LECYxNor0aDo_3l_bdxM3fnA
+    events:
+      - sqs:
+          batchSize: 1
+          arn:
+            Fn::GetAtt: [ JobQueue, Arn]
+
+resources:
+  - ${file(resources/googleKey.yml)}
+  - ${file(resources/jobsQueue.yml)}
+  - ${file(resources/apiKey.yml)}
