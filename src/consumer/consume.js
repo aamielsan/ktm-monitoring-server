@@ -31,7 +31,6 @@ const CELL_FIELD = {
   16: 'cdv_status',
   17: 'cdv_checkStatus',
   18: 'cdv_datePayment',
-  19: 'updatedBy',
 };
 
 const getGoogleKey = async () => {
@@ -88,8 +87,8 @@ const updateRecord = async (record, row) => {
     console.log('Updating row for ', row, record.rcp_item);
 
     const sheet = doc.sheetsByIndex[0];
-    await sheet.loadCells(`A${row + 1}:T${row + 1}`);
-    for (let col = 0; col < 20; col++) {
+    await sheet.loadCells(`A${row + 1}:S${row + 1}`);
+    for (let col = 0; col < 19; col++) {
       const cell = sheet.getCell(row, col);
       const value = record[CELL_FIELD[col]];
       cell.value = value;
@@ -123,7 +122,6 @@ module.exports.handler = async (event) => {
         continue;
       }
 
-      console.log('Processing record ', record);
       const row = await findRowById(data.rcp_item);
       await updateRecord(data, row);
     }
