@@ -5,7 +5,7 @@ Resources:
       QueueName: ${self:service}-${self:provider.stage}
       KmsMasterKeyId: alias/aws/sqs
       RedrivePolicy:
-        maxReceiveCount: 5
+        maxReceiveCount: 20
         deadLetterTargetArn:
           Fn::GetAtt: [ DeadLetterQueue, Arn ]
   DeadLetterQueue:
