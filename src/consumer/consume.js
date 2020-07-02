@@ -11,27 +11,28 @@ let googlePrivateKey;
 
 const doc = new GoogleSpreadsheet(googleSheetId);
 
-const CELL_FIELD = {
-  0: 'rcp_item',
-  1: 'rcp_payee',
-  2: 'rcp_invoiceRef',
-  3: 'rcp_amtPeso',
-  4: 'rcp_amtDollar',
-  5: 'rcp_particulars',
-  6: 'rcp_dateDue',
-  7: 'rcp_dateTransmitted',
-  8: 'apv_dateTransaction',
-  9: 'apv_no',
-  10: 'apv_remarks',
-  11: 'apv_dateTransmitted',
-  12: 'apv_receivedBy',
-  13: 'cdv_dateTransaction',
-  14: 'cdv_no',
-  15: 'cdv_checkNo',
-  16: 'cdv_status',
-  17: 'cdv_checkStatus',
-  18: 'cdv_datePayment',
-};
+const CELL_FIELD = [
+  'rcp_item',
+  'rcp_payee',
+  'rcp_invoiceRef',
+  'rcp_amtPeso',
+  'rcp_amtDollar',
+  'rcp_particulars',
+  'rcp_dateDue',
+  'rcp_dateTransmitted',
+  'apv_dateTransaction',
+  'apv_no',
+  'apv_remarks',
+  'apv_dateTransmitted',
+  'apv_receivedBy',
+  'cdv_dateTransaction',
+  'cdv_no',
+  'cdv_checkNo',
+  'cdv_status',
+  'cdv_checkStatus',
+  'cdv_datePayment',
+  'cdv_orNo',
+];
 
 const getGoogleKey = async () => {
   try {
@@ -60,18 +61,25 @@ const findRowById = async (id) => {
   try {
     console.log('Looking for id ', id);
     const data = doc.sheetsByIndex[0];
-    await data.loadCells(`A1:A${count + 1}`)
+    await data.loadCells(`A1:A${count}`);
+    console.log(data.cellStats);
+
+    const strId = String(id).trim().toLowerCase();
 
     for (let i = 0; i < count; i++) {
       const dataId = data.getCell(i, 0).value;
-      console.log('Checking row id ', dataId);
+      const strDataId = String(dataId).trim().toLowerCase();
+      console.log('Checking row id ', {
+        dataId,
+        strDataId,
+      });
 
       if (!dataId) {
         console.log('Reached new row ', i);
         return i;
       }
 
-      if (dataId === id) {
+      if (strId === strDataId) {
         return i;
       }
     }
@@ -87,10 +95,11 @@ const updateRecord = async (record, row) => {
     console.log('Updating row for ', row, record.rcp_item);
 
     const sheet = doc.sheetsByIndex[0];
-    await sheet.loadCells(`A${row + 1}:S${row + 1}`);
-    for (let col = 0; col < 19; col++) {
+    await sheet.loadCells(`A${row + 1}:T${row + 1}`);
+    for (let col = 0; col < CELL_FIELD.length; col++) {
+      const field = CELL_FIELD[col];
       const cell = sheet.getCell(row, col);
-      const value = record[CELL_FIELD[col]];
+      const value = record[field];
       cell.value = value;
     }
     await sheet.saveUpdatedCells();
@@ -113,7 +122,7 @@ module.exports.handler = async (event) => {
       const { id, data } = JSON.parse(record.body);
 
       if (googleSheetId !== id) {
-        console.log('Not a worker for the ID. Skipping...');
+        console.log('Not a worker for the ID. Skipping...', data);
         continue;
       }
 
@@ -128,8 +137,8 @@ module.exports.handler = async (event) => {
 
     doc.resetLocalCache();
 
-  } catch (error) {
-    console.log(error);
+  } catch (e) {
+    console.log(e);
     throw e;
   }
 };

@@ -25,7 +25,7 @@ function extract(data) {
     'cdv_status',
     'cdv_checkStatus',
     'cdv_datePayment',
-    'updatedBy',
+    'cdv_orNo',
   ];
 
   return KEYS.reduce((res, key) => {
