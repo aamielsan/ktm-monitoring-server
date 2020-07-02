@@ -63,9 +63,22 @@ functions:
       GOOGLE_SHEET_ID: ${self:custom.googleSheetId}
     events:
       - sqs:
-          batchSize: 5
+          batchSize: 10
           arn:
             Fn::GetAtt: [ JobQueue, Arn ]
+
+  # dlqConsumer:
+    # reservedConcurrency: 1
+    # handler: src/consumer/consume.handler
+    # environment:
+      # GOOGLE_SA_EMAIL: ${file(.keys/gsheetKey.json):client_email}
+      # GOOGLE_PK_SECRET_ID: ${self:custom.googleSecretKeyId}
+      # GOOGLE_SHEET_ID: ${self:custom.googleSheetId}
+    # events:
+      # - sqs:
+          # batchSize: 10
+          # arn:
+            # Fn::GetAtt: [ DeadLetterQueue, Arn ]
 
 resources:
   - ${file(resources/googleKey.yml)}
