@@ -28,8 +28,8 @@ custom:
   memorySize: 128
   defaultStage: dev
   profiles:
-    dev: potechSlsDev
-    prod: potechSlsDev
+    dev: potech-serverless
+    prod: potech-serverless
   googleSheetId: ${opt:sheetId}
   googleSecretKeyId: ${self:service}-${self:provider.stage}-key
 

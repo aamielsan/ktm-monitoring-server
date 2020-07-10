@@ -13,28 +13,28 @@ Resources:
     Properties:
       QueueName: ${self:service}-${self:provider.stage}-dlq
       KmsMasterKeyId: alias/aws/sqs
-  DLQAlarm:
-    Type: "AWS::CloudWatch::Alarm"
-    Properties:
-      AlarmDescription:
-        'Fn::Join':
-          - ''
-          - - Alarm if message exists at DLQ
-            - GetAttr: [ DeadLetterQueue, QueueName ]
-      AlarmName: 
-        'Fn::Join':
-          - ''
-          - - GetAttr: [ DeadLetterQueue, QueueName ]
-            - Alarm
-      ComparisonOperator: GreaterThanThreshold
-      Namespace: AWS/SQS
-      MetricName: NumberOfMessagesSent
-      Statistic: Count
-      Period: '60'
-      EvaluationPeriods: '3'
-      Threshold: '90'
-      Dimensions:
-        - Name: QueueName
-          Value:
-            GetAttr: [ DeadLetterQueue, QueueName ]
+  # DLQAlarm:
+    # Type: "AWS::CloudWatch::Alarm"
+    # Properties:
+      # AlarmDescription:
+        # 'Fn::Join':
+          # - ''
+          # - - Alarm if message exists at DLQ
+            # - GetAttr: [ DeadLetterQueue, QueueName ]
+      # AlarmName: 
+        # 'Fn::Join':
+          # - ''
+          # - - GetAttr: [ DeadLetterQueue, QueueName ]
+            # - Alarm
+      # ComparisonOperator: GreaterThanThreshold
+      # Namespace: AWS/SQS
+      # MetricName: NumberOfMessagesSent
+      # Statistic: Count
+      # Period: '60'
+      # EvaluationPeriods: '3'
+      # Threshold: '90'
+      # Dimensions:
+        # - Name: QueueName
+          # Value:
+            # GetAttr: [ DeadLetterQueue, QueueName ]
 
