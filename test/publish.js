@@ -1,6 +1,5 @@
 'use strict';
 
-const AWSMock = require("aws-sdk-mock");
 const AWS = require("aws-sdk"); 
 
 const mochaPlugin = require('serverless-mocha-plugin');
@@ -12,8 +11,6 @@ const mockData = require('./mocks/PublishData.json');
 
 describe('publish', () => {
   before((done) => {
-    AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('SQS', 'sendMessage', () => {});
     done();
   });
 
@@ -22,14 +19,13 @@ describe('publish', () => {
     expect(response.statusCode).to.be.equal(400);
   });
 
-  // it('should return valid response', async () => {
-    // const data = mockApi(JSON.stringify(mockData));
-    // const response = await wrapped.run(data);
-    // expect(response.statusCode).to.be.equal(400);
-  // });
+  it('should return valid response', async () => {
+    const data = mockApi(JSON.stringify(mockData));
+    const response = await wrapped.run(data);
+    expect(response.statusCode).to.be.equal(200);
+  });
 
   after((done) => {
-    AWSMock.restore('SQS');
     done();
   })
 });

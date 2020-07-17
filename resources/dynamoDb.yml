@@ -1,0 +1,17 @@
+Resources:
+  SimpleTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: ${self:service}-${self:provider.stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: 
+        - 
+          AttributeName: "Count"
+          AttributeType: "N"
+        - 
+          AttributeName: "Version"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "Id"
+          KeyType: "HASH"

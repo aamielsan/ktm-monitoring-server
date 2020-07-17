@@ -90,7 +90,7 @@ const findRowById = async (id) => {
   }
 }
 
-const updateRecord = async (record, row) => {
+const updateRow = async (row, record) => {
   try {
     console.log('Updating row for ', row, record.rcp_item);
 
@@ -132,7 +132,8 @@ module.exports.handler = async (event) => {
       }
 
       const row = await findRowById(data.rcp_item);
-      await updateRecord(data, row);
+
+      await updateRow(row, data);
     }
 
     doc.resetLocalCache();

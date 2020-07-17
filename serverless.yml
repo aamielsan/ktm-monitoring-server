@@ -7,7 +7,7 @@ provider:
   memorySize: ${self:custom.memorySize}
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${self:custom.region}
-  profile: ${self:custom.profiles.${opt:stage, self:provider.stage, 'dev'}}
+  profile: potech-serverless
 
   iamRoleStatements:
   - Effect: Allow
@@ -26,14 +26,30 @@ provider:
 custom: 
   region: us-east-1
   memorySize: 128
-  defaultStage: dev
+  defaultStage: local
   profiles:
     dev: potech-serverless
+    local: potech-serverless
     prod: potech-serverless
   googleSheetId: ${opt:sheetId}
   googleSecretKeyId: ${self:service}-${self:provider.stage}-key
 
+  localstack:
+    stages:
+      - local
+    host: http://localhost
+    autostart: true
+    endpoints:
+      DynamoDB: http://localhost:4569
+      CloudFormation: http://localhost:4581
+      SQS: http://localhost:4576
+    lambda:
+      mountCode: True
+    docker:
+      sudo: False
+
 plugins:
+  - serverless-localstack
   - serverless-mocha-plugin
 
 package:

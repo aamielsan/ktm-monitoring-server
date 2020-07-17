@@ -8,11 +8,11 @@ Resources:
         maxReceiveCount: 20
         deadLetterTargetArn:
           Fn::GetAtt: [ DeadLetterQueue, Arn ]
-  DeadLetterQueue:
-    Type: "AWS::SQS::Queue"
-    Properties:
-      QueueName: ${self:service}-${self:provider.stage}-dlq
-      KmsMasterKeyId: alias/aws/sqs
+  # DeadLetterQueue:
+    # Type: "AWS::SQS::Queue"
+    # Properties:
+      # QueueName: ${self:service}-${self:provider.stage}-dlq
+      # KmsMasterKeyId: alias/aws/sqs
   # DLQAlarm:
     # Type: "AWS::CloudWatch::Alarm"
     # Properties:
